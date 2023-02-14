@@ -42,8 +42,13 @@ SCANVISscan<-function(sj,gen,Rcut=5,bam=NULL,samtools=NULL){
             start, end and uniq.reads as colnames')
     }
     sj=sj[which(as.numeric(sj[,'uniq.reads'])>=Rcut),]
-    sj=gsub(' ','',sj)
+    #sj=gsub(' ','',sj)
+    
+    print("xxxx")
+    
     sj=sj[which(is.element(sj[,'chr'],unique(gen.GENES[,'chr']))),]
+    
+    print("yyyy")
     d=as.numeric(sj[,'end'])-as.numeric(sj[,'start'])
     if(min(abs(d))==0)
         sj=sj[which(abs(d)>0),]
@@ -65,7 +70,7 @@ SCANVISscan<-function(sj,gen,Rcut=5,bam=NULL,samtools=NULL){
 
     ############################################################################
     ##START: annotate SJs, ASJ and USJ
-    sj=gsub(' ','',sj)
+    #sj=gsub(' ','',sj)
     gen=gen.EXONS
     options(scipen=999)
     out=rep(0,nrow(sj))
@@ -492,7 +497,7 @@ SCANVISscan<-function(sj,gen,Rcut=5,bam=NULL,samtools=NULL){
     ##START: getting/scoring NEs by finding USJs coinciding in intronic regions
     print('*** Collecting and scoring all potential NEs ... ***')
     NE=NULL    
-    USJ=gsub(' ','',sj[which(sj[,'JuncType']!='annot'),])
+    USJ=sj[which(sj[,'JuncType']!='annot'),]
     CHR=intersect(unique(USJ[,'chr']),gen.INTRONS[,'chr'])
     if(length(CHR)==0) USJ[,'chr']=paste0('chr',USJ[,'chr'])
     CHR=intersect(unique(USJ[,'chr']),gen.INTRONS[,'chr'])
@@ -570,7 +575,7 @@ SCANVISscan<-function(sj,gen,Rcut=5,bam=NULL,samtools=NULL){
         if(length(NE)>4)
             colnames(NE)=c('chr','start','end','uniq.reads','RRS')
 
-        ##print('*** Annotating by gene name ***')
+        print('*** Annotating by gene name ***')
         g=rep('',nrow(NE))
         for(i in unique(NE[,'chr'])){
             q=which(NE[,'chr']==i)
@@ -600,22 +605,22 @@ SCANVISscan<-function(sj,gen,Rcut=5,bam=NULL,samtools=NULL){
         NE=cbind(NE,'NE')
         colnames(NE)[ncol(NE)]='JuncType'
         h=which(g=='')
-        if(length(h)>0){
-            q=which(USJ[,'gene_name']=='')
-            if(length(q)>0) USJ[q,'gene_name']='NA'
-            NE[h,'JuncType']='NE_IG'
-            rownames(USJ)=paste(USJ[,'chr'],USJ[,'end'])
-            tmp=paste(NE[h,'chr'],NE[h,'start'])
-            g=USJ[tmp,'gene_name']
-            rownames(USJ)=paste(USJ[,'chr'],USJ[,'start'])
-            tmp=paste(NE[h,'chr'],NE[h,'end'])
-            g=paste(g,USJ[tmp,'gene_name'],sep='---')
-            NE[h,'gene_name']=g
-        }
+        # if(length(h)>0){
+        #     q=which(USJ[,'gene_name']=='')
+        #     if(length(q)>0) USJ[q,'gene_name']='NA'
+        #     NE[h,'JuncType']='NE_IG'
+        #     USJ[,'rownames']=paste(USJ[,'chr'],USJ[,'end'])
+        #     tmp=paste(NE[h,'chr'],NE[h,'start'])
+        #     g=USJ[tmp,'gene_name']
+        #     USJ[,'rownames']=paste(USJ[,'chr'],USJ[,'start'])
+        #     tmp=paste(NE[h,'chr'],NE[h,'end'])
+        #     g=paste(g,USJ[tmp,'gene_name'],sep='---')
+        #     NE[h,'gene_name']=g
+        # }
     }
     ##return only NEs with at least 3bp
     if(length(NE)>0){
-        NE=gsub(' ','',NE)
+        #NE=gsub(' ','',NE)
         dd=as.numeric(NE[,'end'])-as.numeric(NE[,'start'])
         q=which(dd>=3)
         ##filter for any NEs that are actually Unknown SJs
